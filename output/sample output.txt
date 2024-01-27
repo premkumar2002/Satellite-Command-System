@@ -1,0 +1,157 @@
+Initial State:
+Orientation: North
+Solar Panels: Inactive
+Data Collected: 0
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+rotate south
+Satellite rotated to south direction.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+rotate east
+Satellite rotated to east direction.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+collect
+Solar panels are inactive. Cannot collect data.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+activate
+Solar panels activated.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+rotate west
+Satellite rotated to west direction.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+collect
+Data collected.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+rotate north 
+Satellite rotated to north direction.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+collect 
+Data collected.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+rotate west
+Satellite rotated to west direction.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+collect
+Data collected.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+status
+Orientation: west
+Solar Panels: Active
+Data Collected: 30
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+deactivate
+Solar panels deactivated.
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+status
+Orientation: west
+Solar Panels: Inactive
+Data Collected: 30
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+exot
+Invalid command!
+
+Enter command:
+1. rotate
+2. activate
+3. deactivate
+4. collect
+5. status
+6. exit
+exit

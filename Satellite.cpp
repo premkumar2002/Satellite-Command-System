@@ -1,192 +1,131 @@
 #include <iostream>
-#include <vector>
-#include <memory>
-using namespace std;
+#include <stdexcept>
+#include <sstream>
 
-// Loggers interface
-class ILogger {
-  public:
-    virtual void log(string message) = 0;
-};
-
-// Console logger 
-class ConsoleLogger : public ILogger {
-  public:
-    void log(string message) override {
-      cout << "[LOG] " << message << endl; 
-    }
-};
-
-// Command interface
-class ICommand {
-  public:
+class Command {
+public:
     virtual void execute() = 0;
+    virtual ~Command() {}
+};
+
+class ILogger {
+public:
+    virtual void log(const std::string& message) const = 0;
+    virtual ~ILogger() {}
+};
+
+
+class ConsoleLogger : public ILogger {
+public:
+    void log(const std::string& message) const override {
+        std::cout << message << std::endl;
+    }
 };
 
 class Satellite {
-    private:
-        string orientation;
-        string solarPanelStatus;
-        int dataCollected;
+private:
+    std::string orientation;
+    bool solarPanelsActive;
+    int dataCollected;
 
-    public:
-        Satellite() {
-            orientation = "North";
-            solarPanelStatus = "Inactive";
-            dataCollected = 0;
-        }
+public:
+    Satellite() : orientation("North"), solarPanelsActive(false), dataCollected(0) {}
 
-        void rotate(string direction) {
-            orientation = direction;
-        }
-
-        void activatePanels() {
-            solarPanelStatus = "Active"; 
-        }
-
-        void deactivatePanels() {
-            solarPanelStatus = "Inactive";
-        }
-
-        void collectData() {
-          if(solarPanelStatus == "Active") {
-            dataCollected = dataCollected + 10; 
-          } else {
-            cout << "Cannot collect data, solar panels deactivated" << endl;
-          }
-}
-
-        string getOrientation() {
-            return orientation; 
-        }
-        
-        string getSolarPanelStatus() {
-            return solarPanelStatus;
-        }
-        
-        int getDataCollected() {
-            return dataCollected;
-        }
-        void setDataCollected(int newData) {
-            dataCollected = newData;
-        }
-
-};
-
-void showStatus(Satellite satellite) {
-    cout << "Orientation: " << satellite.getOrientation() << endl;
-    cout << "Solar Panels: " << satellite.getSolarPanelStatus() << endl;
-    cout << "Data Collected: " << satellite.getDataCollected() << endl;
-}
-
-class CollectDataCommand : public ICommand {
-  public:
-    CollectDataCommand(Satellite* satellite) {
-      this->satellite = satellite;  
+    void rotate(const std::string& direction) {
+        orientation = direction;
     }
 
-    void execute() override {
-      if(satellite->getSolarPanelStatus() == "Active") { 
-        int dataCollected = satellite->getDataCollected();
-        satellite->setDataCollected(dataCollected + 10);
-      }
+    void activatePanels() {
+        solarPanelsActive = true;
     }
 
-  private:
-    Satellite* satellite;
-};
-
-
-class RotateCommand : public ICommand {
-  public:  
-    RotateCommand(Satellite* satellite, string direction) {
-      this->satellite = satellite;
-      this->direction = direction;
+    void deactivatePanels() {
+        solarPanelsActive = false;
     }
 
-    void execute() override {
-      satellite->rotate(direction); 
+    void collectData() {
+        if (solarPanelsActive) {
+            dataCollected += 10;
+        } else {
+            throw std::logic_error("Solar panels are inactive. Cannot collect data.");
+        }
     }
 
-  private:
-    Satellite* satellite;
-    string direction;
-};
-
-class ActivatePanelCommand : public ICommand {
-
-  public:
-    ActivatePanelCommand(Satellite* satellite) {
-      this->satellite = satellite;  
+    std::string getOrientation() const {
+        return orientation;
     }
 
-    void execute() override {
-      satellite->activatePanels(); 
+    std::string getSolarPanelStatus() const {
+        return solarPanelsActive ? "Active" : "Inactive";
     }
 
-  private:
-    Satellite* satellite;
-};
-
-class ShowStatusCommand : public ICommand {
-
-  public:
-    ShowStatusCommand(Satellite* sat) {
-      satellite = sat;
+    int getDataCollected() const {
+        return dataCollected;
     }
-
-    void execute() override {
-      showStatus(*satellite);
-    }
-
-  private:
-    Satellite* satellite;  
 };
 
 class CommandExecutor {
-  public:
-    void setLogger(ILogger* logger) {
-      this->logger = logger;
-    }
+private:
+    Satellite& satellite;
+    ILogger& logger;
 
-    void executeCommand(ICommand* command) {
-      try {
-        command->execute();
-      } catch(exception& e) {
-        logger->log("Command failed: " + string(e.what())); 
-      }
-    }
+public:
+    CommandExecutor(Satellite& satellite, ILogger& logger) : satellite(satellite), logger(logger) {}
 
-  private:
-    ILogger* logger;
+    void executeCommand(const std::string& input) {
+        std::istringstream iss(input);
+        std::string action;
+        std::string argument;
+        iss >> action;
+
+        try {
+            if (action == "rotate") {
+                iss >> argument;
+                satellite.rotate(argument);
+                logger.log("Satellite rotated to " + argument + " direction.");
+            } else if (action == "activate") {
+                satellite.activatePanels();
+                logger.log("Solar panels activated.");
+            } else if (action == "deactivate") {
+                satellite.deactivatePanels();
+                logger.log("Solar panels deactivated.");
+            } else if (action == "collect") {
+                satellite.collectData();
+                logger.log("Data collected.");
+            } else if (action == "status") {
+                logger.log("Orientation: " + satellite.getOrientation());
+                logger.log("Solar Panels: " + satellite.getSolarPanelStatus());
+                logger.log("Data Collected: " + std::to_string(satellite.getDataCollected()));
+            } else {
+                throw std::invalid_argument("Invalid command!");
+            }
+        } catch (const std::exception& e) {
+            logger.log(e.what());
+        }
+    }
 };
 
-
 int main() {
+    Satellite satellite;
+    ConsoleLogger logger;
+    CommandExecutor executor(satellite, logger);
 
-  Satellite satellite;
-  CommandExecutor executor;
-  executor.setLogger(new ConsoleLogger());
+    logger.log("Initial State:");
+    logger.log("Orientation: " + satellite.getOrientation());
+    logger.log("Solar Panels: " + satellite.getSolarPanelStatus());
+    logger.log("Data Collected: " + std::to_string(satellite.getDataCollected()));
 
-  while(true) {
-    string command;
+    std::string input;
+    while (true) {
+        std::cout << "\nEnter command:\n1. rotate\n2. activate\n3. deactivate\n4. collect\n5. status\n6. exit\n";
+        std::getline(std::cin, input);
 
-    cout << "Enter command (rotate, activate, collect, status, exit): ";
-    cin >> command;
+        if (input == "exit") {
+            break;
+        }
 
-    if(command == "exit") {
-      break;
+        executor.executeCommand(input);
     }
-    else if(command == "rotate") {
-      string dir;
-      cin >> dir;
-      executor.executeCommand(new RotateCommand(&satellite, dir));
 
-    } else if(command == "activate") {
-      executor.executeCommand(new ActivatePanelCommand(&satellite));
-    
-    } else if(command == "status") {
-    executor.executeCommand(new ShowStatusCommand(&satellite));
-  }
-  } 
+    return 0;
 }
